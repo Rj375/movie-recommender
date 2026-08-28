@@ -190,6 +190,16 @@ trending = trending.merge(details, on="movieId", how="left")
 genre_list = sorted({g for genres in movies["genres"].str.split("|") for g in genres if g != "(no genres listed)"})
 categories = list(FRANCHISE_KEYWORDS.keys()) + genre_list
 
+st.markdown(
+    """
+    <style>
+    img { max-width: 100%; height: auto; }
+    .block-container { padding-left: 1rem; padding-right: 1rem; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("🎬 Trending Movies This Week")
 st.caption("Worldwide trending movies, filterable by genre or franchise.")
 
@@ -233,11 +243,16 @@ else:
             with poster_col:
                 poster_url = fetch_poster_url(row.get("tmdbId"), TMDB_API_KEY)
                 if poster_url:
-                    st.image(poster_url, use_container_width=True)
+                    st.markdown(
+                        f"<img src='{poster_url}' style='width:100%;max-width:200px;display:block;"
+                        "margin:0 auto;border-radius:8px;'/>",
+                        unsafe_allow_html=True,
+                    )
                 else:
                     st.markdown(
-                        "<div style='aspect-ratio:2/3;background:#3332;border-radius:8px;"
-                        "display:flex;align-items:center;justify-content:center;font-size:2rem;'>🎬</div>",
+                        "<div style='width:100%;max-width:200px;aspect-ratio:2/3;background:#3332;"
+                        "border-radius:8px;display:flex;align-items:center;justify-content:center;"
+                        "font-size:2rem;margin:0 auto;'>🎬</div>",
                         unsafe_allow_html=True,
                     )
 
@@ -257,19 +272,20 @@ else:
                 if where:
                     label = "Stream on" if providers.get("flatrate") else "Rent/buy on"
                     st.caption(f"📺 {label}:")
-                    badge_cols = st.columns(len(where[:6]))
-                    for col, p in zip(badge_cols, where[:6]):
-                        with col:
-                            url = platform_link(p["provider_name"], providers.get("link"))
-                            st.markdown(
-                                f"<a href='{url}' target='_blank' rel='noopener' "
-                                "style='text-decoration:none;color:inherit;'>"
-                                f"<img src='https://image.tmdb.org/t/p/w45{p['logo_path']}' width='32' "
-                                "style='border-radius:6px;display:block;margin:0 auto;'/>"
-                                f"<div style='text-align:center;font-size:0.75rem;'>{p['provider_name']}</div>"
-                                "</a>",
-                                unsafe_allow_html=True,
-                            )
+                    badges_html = "<div style='display:flex;flex-wrap:wrap;gap:10px;'>"
+                    for p in where[:6]:
+                        url = platform_link(p["provider_name"], providers.get("link"))
+                        badges_html += (
+                            f"<a href='{url}' target='_blank' rel='noopener' "
+                            "style='text-decoration:none;color:inherit;display:flex;flex-direction:column;"
+                            "align-items:center;width:60px;'>"
+                            f"<img src='https://image.tmdb.org/t/p/w45{p['logo_path']}' width='32' height='32' "
+                            "style='border-radius:6px;'/>"
+                            f"<span style='text-align:center;font-size:0.7rem;line-height:1.1;margin-top:2px;'>"
+                            f"{p['provider_name']}</span></a>"
+                        )
+                    badges_html += "</div>"
+                    st.markdown(badges_html, unsafe_allow_html=True)
                     st.caption("Streaming data via [JustWatch](https://www.justwatch.com/)")
                 elif TMDB_API_KEY:
                     st.caption(f"📺 Not currently available to stream in {region}")
