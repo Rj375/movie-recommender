@@ -52,7 +52,7 @@ def platform_link(provider_name, fallback_link):
             return home_url
     return fallback_link or "https://www.themoviedb.org"
 
-st.set_page_config(page_title="Trending This Week", page_icon="🎬", layout="centered")
+st.set_page_config(page_title="Trending Movies This Week", page_icon="🎬", layout="centered")
 
 # MovieLens has no franchise tags, so these are matched against titles by keyword instead of genre.
 FRANCHISE_KEYWORDS = {
@@ -190,7 +190,7 @@ trending = trending.merge(details, on="movieId", how="left")
 genre_list = sorted({g for genres in movies["genres"].str.split("|") for g in genres if g != "(no genres listed)"})
 categories = list(FRANCHISE_KEYWORDS.keys()) + genre_list
 
-st.title("🎬 Trending This Week")
+st.title("🎬 Trending Movies This Week")
 st.caption("Worldwide trending movies, filterable by genre or franchise.")
 
 if not TMDB_API_KEY:
