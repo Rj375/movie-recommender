@@ -213,6 +213,18 @@ if not TMDB_API_KEY:
 regions = fetch_regions(TMDB_API_KEY)
 region_order = sorted(regions, key=lambda c: regions[c])
 
+
+def detect_region(available):
+    locale = st.context.locale or ""
+    if "-" in locale:
+        candidate = locale.split("-")[-1].upper()
+        if candidate in available:
+            return candidate
+    return "US" if "US" in available else available[0]
+
+
+default_region = detect_region(region_order)
+
 with st.sidebar:
     st.header("Filters")
     selected = st.multiselect("Genre / Franchise", categories, placeholder="e.g. Marvel, Horror, Romance...")
@@ -221,7 +233,7 @@ with st.sidebar:
     region = st.selectbox(
         "Your country (for streaming availability)",
         region_order,
-        index=region_order.index("US") if "US" in region_order else 0,
+        index=region_order.index(default_region),
         format_func=lambda c: f"{regions[c]} ({c})",
     )
 
